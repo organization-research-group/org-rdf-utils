@@ -7,6 +7,9 @@
   "author": "Patrick Golden <ptgolden@email.unc.edu>",
   "license": "CC0",
   "dependencies": {
-    "n3": "^1.0.0-beta.1"
+    "n3": "^1.0.3"
+  },
+  "devDependencies": {
+    "blue-tape": "^1.0.0"
   }
 }

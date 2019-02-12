@@ -1,12 +1,16 @@
 "use strict";
 
 const N3 = require('n3')
-    , { namedNode } = N3.DataFactory
 
-const RDF = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#'
-    , rdfNil = namedNode(RDF + 'nil')
-    , rdfFirst = namedNode(RDF + 'first')
-    , rdfRest = namedNode(RDF + 'rest')
+const NAMESPACES = {
+  rdf: 'http://www.w3.org/1999/02/22-rdf-syntax-ns#'
+}
+
+const expandNS = nsExpander(NAMESPACES)
+
+const rdfNil = expandNS('rdf:nil')
+    , rdfFirst = expandNS('rdf:first')
+    , rdfRest = expandNS('rdf:rest')
 
 async function rdfToStore(rdfString) {
   const parser = N3.Parser()
@@ -24,6 +28,25 @@ async function rdfToStore(rdfString) {
     })
   })
 }
+
+function isType(store, type, uri) {
+  return store.some(x => x, uri, expandNS('rdf:type'), type)
+}
+
+function getFirstObject(store, s, p) {
+  const statement = findOne(store, s, p)
+
+  return statement ? statement.object : null
+}
+
+function getFirstObjectLiteral(store, s, p) {
+  const object = getFirstObject(store, s, p)
+
+  if (!object || !N3.Util.isLiteral(object)) return null
+
+  return object.value
+}
+
 
 function findOne(store, s, p, o) {
   let ret = null
@@ -76,9 +99,43 @@ function nsExpander(prefixes) {
   })
 }
 
+// Given a store and one or more nodes, return a new store that is a subset of
+// the original. The new graph is constructed by starting with all the
+// statements in the original graph where the given nodes are subjects. The
+// original graph is then re-traversed to find all the statements where those
+// objects are subjects, and so on, until all matching statements are exhausted.
+function makeSubgraphFrom(store, nodes) {
+  const newStore = N3.Store()
+      , subjs = [...[].concat(nodes)]
+
+  while (subjs.length) {
+    const subj = subjs.shift()
+
+    store.getQuads(subj).forEach(quad => {
+      const searchForObject = (
+        newStore.addQuad(quad) && (
+          N3.Util.isNamedNode(quad.object) ||
+          N3.Util.isBlankNode(quad.object)
+        )
+      )
+
+      if (searchForObject) {
+        subjs.push(quad.object)
+      }
+    })
+  }
+
+  return newStore
+}
+
+
 module.exports = {
   rdfToStore,
   findOne,
   rdfListToArray,
   nsExpander,
+  isType,
+  getFirstObject,
+  getFirstObjectLiteral,
+  makeSubgraphFrom,
 }
