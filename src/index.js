@@ -12,18 +12,18 @@ const rdfNil = expandNS('rdf:nil')
     , rdfFirst = expandNS('rdf:first')
     , rdfRest = expandNS('rdf:rest')
 
-async function rdfToStore(rdfString) {
-  const parser = N3.Parser()
-      , store = N3.Store()
+async function parseToPromise(parser, rdfString) {
+  const store = N3.Store()
+      , quads = []
 
   return new Promise((resolve, reject) => {
     parser.parse(rdfString, (err, quad, prefixes) => {
       if (err) {
         reject(err);
       } else if (quad) {
-        store.addQuad(quad);
+        quads.push(quad);
       } else {
-        resolve({ store, prefixes });
+        resolve({ quads, prefixes });
       }
     })
   })
@@ -130,7 +130,7 @@ function makeSubgraphFrom(store, nodes) {
 
 
 module.exports = {
-  rdfToStore,
+  parseToPromise,
   findOne,
   rdfListToArray,
   nsExpander,

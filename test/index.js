@@ -3,14 +3,16 @@
 const test = require('blue-tape')
     , N3 = require('n3')
     , { namedNode } = N3.DataFactory
-    , { rdfToStore, findOne, rdfListToArray } = require('../')
+    , { parseToPromise, findOne, rdfListToArray } = require('../')
 
 test('N3 Utils', async t => {
+  const parser = new N3.Parser()
+
   const prefixes = N3.Util.prefixes({
     ex: 'http://example.com/',
   })
 
-  const { store } = await rdfToStore(`
+  const { quads } = await parseToPromise(parser, `
     @prefix ex: <http://example.com/> .
 
     ex:a ex:b ex:c .
@@ -22,7 +24,10 @@ test('N3 Utils', async t => {
     ) .
   `)
 
-  t.equal(store.size, 8, 'should parse an RDF string into an N3 Store')
+  t.equal(quads.length, 8, 'should parse an RDF string into an N3 Store')
+
+  const store = new N3.Store()
+  store.addQuads(quads)
 
   t.deepEqual(
     await findOne(store, prefixes('ex')('a')),
