@@ -13,7 +13,7 @@ const rdfNil = expandNS('rdf:nil')
     , rdfRest = expandNS('rdf:rest')
 
 async function parseToPromise(parser, rdfString) {
-  const store = N3.Store()
+  const store = new N3.Store()
       , quads = []
 
   return new Promise((resolve, reject) => {
@@ -105,7 +105,7 @@ function nsExpander(prefixes) {
 // original graph is then re-traversed to find all the statements where those
 // objects are subjects, and so on, until all matching statements are exhausted.
 function makeSubgraphFrom(store, nodes) {
-  const newStore = N3.Store()
+  const newStore = new N3.Store()
       , subjs = [...[].concat(nodes)]
 
   while (subjs.length) {
