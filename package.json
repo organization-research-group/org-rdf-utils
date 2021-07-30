@@ -7,10 +7,15 @@
   "author": "Patrick Golden <ptgolden@email.unc.edu>",
   "license": "CC0",
   "dependencies": {
-    "n3": "^1.0.3"
+    "n3": "^1.11.1"
   },
   "devDependencies": {
-    "blue-tape": "^1.0.0"
+    "@types/blue-tape": "^0.1.33",
+    "@types/n3": "^1.10.2",
+    "@typescript-eslint/eslint-plugin": "^4.28.5",
+    "@typescript-eslint/parser": "^4.28.5",
+    "blue-tape": "^1.0.0",
+    "eslint": "^7.31.0"
   },
   "scripts": {
     "test": "blue-tape ./test/*.js"
