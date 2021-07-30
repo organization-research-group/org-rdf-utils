@@ -2,7 +2,13 @@
   "name": "org-n3-utils",
   "version": "2.0.1",
   "description": "Utilities for working with RDF data from N3",
-  "main": "src/index.ts",
+  "main": "./dist/cjs/index.cjs",
+  "exports": {
+    "import": "./dist/esm/index.js",
+    "require": "./dist/cjs/index.cjs"
+  },
+  "type": "module",
+  "types": "./dist/index.d.ts",
   "keywords": [],
   "author": "Patrick Golden <ptgolden@email.unc.edu>",
   "license": "CC0",
@@ -15,6 +21,8 @@
     "@typescript-eslint/eslint-plugin": "^4.28.5",
     "@typescript-eslint/parser": "^4.28.5",
     "blue-tape": "^1.0.0",
+    "dts-bundle-generator": "^5.9.0",
+    "esbuild": "^0.12.17",
     "eslint": "^7.31.0"
   },
   "scripts": {
