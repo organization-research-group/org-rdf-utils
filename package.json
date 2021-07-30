@@ -2,7 +2,7 @@
   "name": "org-n3-utils",
   "version": "2.0.1",
   "description": "Utilities for working with RDF data from N3",
-  "main": "src/index.js",
+  "main": "src/index.ts",
   "keywords": [],
   "author": "Patrick Golden <ptgolden@email.unc.edu>",
   "license": "CC0",
@@ -18,6 +18,6 @@
     "eslint": "^7.31.0"
   },
   "scripts": {
-    "test": "blue-tape ./test/*.js"
+    "test": "ts-node node_modules/.bin/blue-tape ./test/*.ts"
   }
 }

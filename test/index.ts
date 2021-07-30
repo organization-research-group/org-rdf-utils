@@ -1,9 +1,8 @@
-"use strict";
+import test from 'blue-tape'
+import * as N3 from 'n3'
+import * as util from '../'
 
-const test = require('blue-tape')
-    , N3 = require('n3')
-    , { namedNode } = N3.DataFactory
-    , { parseToPromise, findOne, rdfListToArray } = require('../')
+const { namedNode } = N3.DataFactory
 
 test('N3 Utils', async t => {
   const parser = new N3.Parser()
@@ -12,7 +11,7 @@ test('N3 Utils', async t => {
     ex: 'http://example.com/',
   })
 
-  const { quads } = await parseToPromise(parser, `
+  const { quads } = await util.parseToPromise(parser, `
     @prefix ex: <http://example.com/> .
 
     ex:a ex:b ex:c .
@@ -30,23 +29,23 @@ test('N3 Utils', async t => {
   store.addQuads(quads)
 
   t.deepEqual(
-    await findOne(store, prefixes('ex')('a')),
+    await util.findOne(store, prefixes('ex')('a')),
     N3.DataFactory.quad(
       namedNode('http://example.com/a'),
       namedNode('http://example.com/b'),
-      namedNode('http://example.com/c'),
+      namedNode('http://example.com/c')
     ),
     'should be able to find one triple in a store'
   )
 
-  const listHeadNode = (await findOne(
+  const listHeadNode = (await util.findOne(
     store,
     prefixes('ex')('list'),
-    prefixes('ex')('members'),
-  )).object
+    prefixes('ex')('members')
+  ))?.object!
 
   t.deepEqual(
-    await rdfListToArray(store, listHeadNode),
+    await util.rdfListToArray(store, listHeadNode),
     [
       namedNode('http://example.com/d'),
       namedNode('http://example.com/e'),
