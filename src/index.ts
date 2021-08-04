@@ -29,12 +29,18 @@ export function isNode(value: N3.Term | null): value is (N3.NamedNode | N3.Blank
 }
 
 
+type ParsedQuads = {
+  quads: N3.Quad[];
+  prefixes: N3.Prefixes;
 }
 
-export async function parseToPromise(parser: N3.Parser, rdfString: string) {
+export async function parseToPromise(
+  parser: N3.Parser,
+  rdfString: string
+): Promise<ParsedQuads> {
   const quads: N3.Quad[] = []
 
-  return new Promise<{ quads: N3.Quad[], prefixes: N3.Prefixes }>((resolve, reject) => {
+  return new Promise<ParsedQuads>((resolve, reject) => {
     parser.parse(rdfString, (err, quad, prefixes) => {
       if (err) {
         reject(err);
@@ -47,22 +53,34 @@ export async function parseToPromise(parser: N3.Parser, rdfString: string) {
   })
 }
 
-export function isType(store: N3.Store, type: N3.NamedNode, node: N3.NamedNode) {
+export function isType(
+  store: N3.Store,
+  type: N3.NamedNode,
+  node: N3.NamedNode
+): boolean {
   return store.some(() => true, node, rdfType, type, null)
 }
 
-export function getFirstObject(store: N3.Store, s: N3.OTerm, p: N3.OTerm) {
+export function getFirstObject(
+  store: N3.Store,
+  s: N3.OTerm,
+  p: N3.OTerm
+): N3.Quad_Object | null {
   const statement = findOne(store, s, p)
 
   return statement ? statement.object : null
 }
 
-export function getFirstObjectLiteral( store: N3.Store, s: N3.OTerm, p: N3.OTerm) {
+export function getFirstObjectLiteral(
+  store: N3.Store,
+  s: N3.OTerm,
+  p: N3.OTerm
+): N3.Literal | null {
   const object = getFirstObject(store, s, p)
 
   if (!isLiteral(object)) return null
 
-  return object.value
+  return object
 }
 
 
@@ -72,7 +90,7 @@ export function findOne(
   p: N3.OTerm=null,
   o: N3.OTerm=null,
   g: N3.OTerm=null
-) {
+): N3.Quad | null {
   let ret: null | N3.Quad = null
 
   store.some(statement => {
@@ -80,10 +98,13 @@ export function findOne(
     return true
   }, s, p, o, g)
 
-  return ret as null | N3.Quad
+  return ret as N3.Quad | null
 }
 
-export function rdfListToArray(store: N3.Store, headNode: N3.Term) {
+export function rdfListToArray(
+  store: N3.Store,
+  headNode: N3.Term
+): N3.Quad_Object[] {
   const arr: N3.Quad_Object[] = []
 
   if (!isNode(headNode)) {
@@ -145,7 +166,10 @@ export function nsExpander(prefixes: N3.Prefixes<string>) {
 // statements in the original graph where the given nodes are subjects. The
 // original graph is then re-traversed to find all the statements where those
 // objects are subjects, and so on, until all matching statements are exhausted.
-export function makeSubgraphFrom(store: N3.Store, nodes: N3.Quad_Subject[]) {
+export function makeSubgraphFrom(
+  store: N3.Store,
+  nodes: N3.Quad_Subject[]
+): N3.Store {
   const newStore = new N3.Store()
       , subjs = [...nodes]
 
