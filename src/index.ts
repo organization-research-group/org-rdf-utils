@@ -11,16 +11,24 @@ const rdfNil = expandNS('rdf:nil')
     , rdfRest = expandNS('rdf:rest')
     , rdfType = expandNS('rdf:type')
 
-type BlankOrNamedNode = N3.BlankNode | N3.NamedNode
 
-function isBlankOrNamedNode(value: N3.Term | null): value is BlankOrNamedNode {
-  return (
-    N3.Util.isBlankNode(value) ||
-    N3.Util.isNamedNode(value))
+export function isLiteral(value: N3.Term | null): value is N3.Literal {
+  return N3.Util.isLiteral(value)
 }
 
-function isLiteral(value: N3.Term | null): value is N3.Literal {
-  return N3.Util.isLiteral(value)
+export function isBlankNode(value: N3.Term | null): value is N3.BlankNode {
+  return N3.Util.isBlankNode(value)
+}
+
+export function isNamedNode(value: N3.Term | null): value is N3.NamedNode {
+  return N3.Util.isNamedNode(value)
+}
+
+export function isNode(value: N3.Term | null): value is (N3.NamedNode | N3.BlankNode) {
+  return isNamedNode(value) || isBlankNode(value)
+}
+
+
 }
 
 export async function parseToPromise(parser: N3.Parser, rdfString: string) {
@@ -78,7 +86,7 @@ export function findOne(
 export function rdfListToArray(store: N3.Store, headNode: N3.Term) {
   const arr: N3.Quad_Object[] = []
 
-  if (!isBlankOrNamedNode(headNode)) {
+  if (!isNode(headNode)) {
     throw new Error(`Head node ${headNode} is not a blank node or named node`)
   }
 
@@ -101,7 +109,7 @@ export function rdfListToArray(store: N3.Store, headNode: N3.Term) {
 
     const nextNode = nextQuad.object
 
-    if (!isBlankOrNamedNode(nextNode)) {
+    if (!isNode(nextNode)) {
       throw new Error(`The object in the triple ${_headNode} rdf:rest ? is not a blank or named node.`)
     }
 
@@ -149,7 +157,7 @@ export function makeSubgraphFrom(store: N3.Store, nodes: N3.Quad_Subject[]) {
 
       newStore.addQuad(quad)
 
-      if (isBlankOrNamedNode(object)) {
+      if (isNode(object)) {
         subjs.push(object)
       }
     })
